@@ -42,20 +42,32 @@ class Hangman
 
   def display_win
     3.times { puts }
-    puts "Congratulations, you won !"
+    puts "Congratulations, you won!"
     puts "The code was #{@code}."
-    puts "It took you #{@prev_guesses.length} tries."
+    puts "It took you #{@prev_guesses.length} tries. " +
+         "You had #{@lives_left} lives left"
   end
 
   def display_loss
     3.times { puts }
-    puts "Oh no ! You lost"
+    puts "Oh no! You lost"
     puts "The code was #{@code}."
     puts "Better luck next time"
   end
 
+  def pick_random_word
+    word = ""
+    File.foreach("5desk.txt").each_with_index do |line, index|
+      word = line.chomp if rand < 1.0/(index+1)
+    end
+    word
+  end
+
   def generate_code
-    "JAZZ"
+    begin
+      code = self.pick_random_word
+    end until self.valid_word?(code)
+    code.upcase
   end
 
   def valid_guess?(guess)
@@ -63,6 +75,10 @@ class Hangman
       @prev_guesses.none? { |prev_guess| guess == prev_guess}
   end
 
+  def valid_word?(word)
+    5 <= word.length && word.length < 13 && word == word.downcase
+  end
+    
   def win?
     @clue.none? { |char| char == "_" }
   end
@@ -100,7 +116,6 @@ class Hangman
       @lives_left -= 1
     end
   end
-
 end
 
 Hangman.new.play
