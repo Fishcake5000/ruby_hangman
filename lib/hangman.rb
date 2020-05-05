@@ -32,7 +32,7 @@ class Hangman
 
   #Display methods
 
-  def display_stick_figure
+  def display_lives_left
     "You have #{@lives_left} lives left."
   end
 
@@ -46,7 +46,7 @@ class Hangman
 
   def display
     3.times { puts }
-    puts self.display_stick_figure
+    puts self.display_lives_left
     puts self.display_clue
     puts self.display_prev_guesses  
   end
