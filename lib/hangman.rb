@@ -1,3 +1,5 @@
+require 'msgpack'
+
 class Hangman
   MAXIMUM_GUESSES = 8
 
@@ -142,10 +144,25 @@ class Hangman
     end
   end
 
-  #Saving (loading is public)
+  #Saving and loading
+
+  def to_msgpack
+    MessagePack.dump( {
+      code: @code,
+      clue: @clue,
+      prev_guesses: @prev_guesses,
+      lives_left: @lives_left
+    } )
+  end
 
   def save
-
+    puts "What would you like to name your save?"
+    filename = gets.chomp
+    while File.exists?(filename)
+      puts "Sorry that name is already taken, please choose another one"
+      filename = gets.chomp
+    end
+    File.write("saves/#{filename}", self.to_msgpack)
   end
 end
 
