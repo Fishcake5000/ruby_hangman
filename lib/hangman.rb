@@ -24,7 +24,7 @@ class Hangman
     end
   end
 
-  def load
+  def self.load
 
   end
   
