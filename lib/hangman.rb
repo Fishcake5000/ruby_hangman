@@ -3,11 +3,18 @@ require 'msgpack'
 class Hangman
   MAXIMUM_GUESSES = 8
 
-  def initialize
-    @code = self.generate_code
-    @clue = Array.new(@code.length, "_")
-    @prev_guesses = []
-    @lives_left = MAXIMUM_GUESSES
+  def initialize(code = nil, clue = nil, prev_guesses = nil, lives_left = nil)
+    if code
+      @code = code
+      @clue = clue
+      @prev_guesses = prev_guesses
+      @lives_left = lives_left
+    else
+      @code = self.generate_code unless code
+      @clue = Array.new(@code.length, "_") unless clue
+      @prev_guesses = [] unless prev_guesses
+      @lives_left = MAXIMUM_GUESSES unless lives_left
+    end
   end
 
   def play
@@ -19,15 +26,14 @@ class Hangman
         self.play_round
       end
     end
-    if self.win?
-      self.display_win
-    else
-      self.display_loss
-    end
+    (self.win?) ? self.display_win : self.display_loss
   end
 
   def self.load
-
+    filename = self.get_save_filename
+    return unless filename
+    data = File.read("saves/#{filename}")
+    self.from_msgpack(data)
   end
   
   private
@@ -116,6 +122,23 @@ class Hangman
     input == "yes" || input == "y"
   end
 
+  def self.get_save_filename
+    file_array = Dir.glob("saves/*")
+    if file_array.length == 0
+      puts "No saves are available to load"
+      return
+    end
+    file_array.map! { |filename| filename.split("/")[-1] }
+    begin
+      puts "Choose which save you would like to load:"
+      file_array.each_with_index do |filename, index|
+        puts "#{index+1}. #{filename}"
+      end
+      input = gets.chomp.to_i
+    end until 1 <= input && input <= file_array.length
+    file_array[input-1]
+  end
+
   #Game logic
 
   def update_clue(guess)
@@ -153,6 +176,11 @@ class Hangman
       prev_guesses: @prev_guesses,
       lives_left: @lives_left
     } )
+  end
+
+  def self.from_msgpack(data)
+    obj = MessagePack.load(data)
+    self.new(obj["code"], obj["clue"], obj["prev_guesses"], obj["lives_left"])
   end
 
   def save
