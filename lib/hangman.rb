@@ -10,7 +10,12 @@ class Hangman
 
   def play
     until self.win? || @lives_left == 0
-      self.play_round
+      if self.user_wants_to_save?
+        self.save
+        return
+      else
+        self.play_round
+      end
     end
     if self.win?
       self.display_win
@@ -18,8 +23,14 @@ class Hangman
       self.display_loss
     end
   end
+
+  def load
+
+  end
   
   private
+
+  #Display methods
 
   def display_stick_figure
     "You have #{@lives_left} lives left."
@@ -55,6 +66,8 @@ class Hangman
     puts "Better luck next time"
   end
 
+  #Random generation methods
+
   def pick_random_word
     word = ""
     File.foreach("5desk.txt").each_with_index do |line, index|
@@ -70,6 +83,8 @@ class Hangman
     code.upcase
   end
 
+  # Check methods
+
   def valid_guess?(guess)
     (guess.length == 1 || guess.length == @code.length) &&
       @prev_guesses.none? { |prev_guess| guess == prev_guess}
@@ -83,6 +98,8 @@ class Hangman
     @clue.none? { |char| char == "_" }
   end
 
+  #User interaction methods
+
   def get_guess
     begin
       puts "Enter your guess"
@@ -90,6 +107,14 @@ class Hangman
     end until self.valid_guess?(guess)
     guess
   end
+
+  def user_wants_to_save?
+    puts "Would you like to stop here for now and save the game?"
+    input = gets.chomp.downcase
+    input == "yes" || input == "y"
+  end
+
+  #Game logic
 
   def update_clue(guess)
     if guess.length == 1
@@ -116,6 +141,25 @@ class Hangman
       @lives_left -= 1
     end
   end
+
+  #Saving (loading is public)
+
+  def save
+
+  end
 end
 
-Hangman.new.play
+begin
+  puts "Would you like to:"
+  puts "1. Play a new game"
+  puts "2. Load an existing game"
+  puts "3. Exit"
+  input = gets.chomp
+  case input
+  when "1"
+    Hangman.new.play
+  when "2"
+    game = Hangman.load
+    game.play if game
+  end
+end until input == "3"
